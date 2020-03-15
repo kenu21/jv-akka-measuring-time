@@ -14,8 +14,9 @@ public class Main {
         } catch (Exception e) {
             throw new RuntimeException("You can set amount of actors");
         }
-        final ActorSystem<CloneActor.Message> firstActor = ActorSystem.create(CloneActor.create(1), "actor-1");
-        firstActor.tell(new CloneActor.Message(0, amountActors, new HashMap<CloneActor, Long>()));
+        final ActorSystem<CloneActor.Message> firstActor = ActorSystem.create(CloneActor.create(1), "guardian");
+        firstActor.tell(new CloneActor.Message(
+                0, amountActors, "actor 1", new HashMap<String, Long>()));
         try {
             System.out.println("Press any button and \"enter\" for exit");
             System.in.read();

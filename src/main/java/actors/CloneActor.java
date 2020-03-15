@@ -16,11 +16,13 @@ public class CloneActor extends AbstractBehavior<CloneActor.Message> {
     public static final class Message {
         public final int numberOfHopsTravelled;
         public final int amountActors;
-        public final Map<CloneActor, Long> map;
+        public final String nameActor;
+        public final Map<String, Long> map;
 
-        public Message(int numberOfHopsTravelled, int amountActors, Map<CloneActor, Long> map) {
+        public Message(int numberOfHopsTravelled, int amountActors, String nameActor, Map<String, Long> map) {
             this.numberOfHopsTravelled = numberOfHopsTravelled;
             this.amountActors = amountActors;
+            this.nameActor = nameActor;
             this.map = map;
         }
     }
@@ -41,22 +43,21 @@ public class CloneActor extends AbstractBehavior<CloneActor.Message> {
         return newReceiveBuilder().onMessage(CloneActor.Message.class, this::onCloneActorMessage).build();
     }
 
-    @Override
-    public String toString() {
-        return "actor " + id + " message received ";
-    }
-
     private Behavior<Message> onCloneActorMessage(CloneActor.Message message) {
-        Map<CloneActor, Long> map = new HashMap<>(message.map);
-        map.put(this, System.nanoTime());
+        Map<String, Long> map = new HashMap<>(message.map);
+        map.put(message.nameActor, System.nanoTime());
         if (id == message.amountActors) {
-            System.out.println(map);
+            Set<String> keys = map.keySet();
+            for (String actorName : keys) {
+                System.out.println(actorName + ", message received <" + map.get(actorName) + ">");
+            }
             return Behaviors.stopped();
         } else {
             int newId = id + 1;
             ActorRef<Message> messageActorRef = getContext().spawnAnonymous(CloneActor.create(newId));
             int newNumberOfHopsTravelled = message.numberOfHopsTravelled + 1;
-            messageActorRef.tell(new CloneActor.Message(newNumberOfHopsTravelled, message.amountActors, map));
+            messageActorRef.tell(new CloneActor.Message(newNumberOfHopsTravelled,
+                    message.amountActors, "actor " + newNumberOfHopsTravelled, map));
             return this;
         }
     }
